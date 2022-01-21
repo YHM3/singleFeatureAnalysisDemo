@@ -37,10 +37,9 @@ turns = pd.DataFrame(np.vstack((np.abs(feature_test_pack['weights'][:, 0, :]).su
 holds = pd.DataFrame((feature_test_pack['positions'][:] != 0).sum(axis=2).T, index=bench.index,
                      columns=np.arange(1, 11).astype(str)[::-1])
 
-with st.sidebar.expander("Result settings:"):
-    fee_counts = st.sidebar.radio("Fee setting:", ('Count fee', 'No fee'))
+fee_counts = st.sidebar.radio("Fee setting:", ('Count fee', 'No fee'))
 cumu_type = st.sidebar.radio("Cumulative setting:", ('cumsum', 'Cumprod'))
-plot_m = st.sidebar.radio("Plot module:", ("Altair", "Pyecharts"))
+plot_m = st.sidebar.radio("Plot module:", ("Pyecharts", "Altair"))
 
 return_for_brief = ret_w_fee if fee_counts == 'Count fee' else ret_wo_fee
 use_cumsum = True if cumu_type == 'cumsum' else False

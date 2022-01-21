@@ -1,7 +1,7 @@
 import h5py
 import numpy as np
 import pandas as pd
-from functools import cache
+import streamlit as st
 from sklearn.linear_model import LinearRegression
 
 analye_base_pack = h5py.File("someData.h5", "r")
@@ -44,13 +44,13 @@ ind_dict = dict(zip(np.arange(6101,
                      '非银金融')))
 
 
-@cache
+@st.cache
 def sw_first_ind():
     return pd.DataFrame(analye_base_pack["sw_ind"][:],
                         index=pd.to_datetime(analye_base_pack["sw_ind"].attrs['row'].astype(str)),
                         columns=np.char.decode(analye_base_pack["sw_ind"].attrs['col']))
 
-
+@st.cache
 def board_distribution(signal_df):
     stocks = signal_df.columns
     stocks.str.slice(0, 3)
@@ -66,7 +66,7 @@ def board_distribution(signal_df):
             'variable': 'x',
             'value': 'y'})
 
-
+@st.cache
 def mv_style_analysis(return_series):
     dates = return_series.index
     if isinstance(dates[0], pd.Timestamp):
@@ -91,7 +91,7 @@ def mv_style_analysis(return_series):
     return style_percent.T.reset_index().melt('index').rename(
         columns={'index': 'category', 'variable': 'x', 'value': 'y'})
 
-
+@st.cache
 def ind_distribution(weights_map):
     sigs_map = np.heaviside(weights_map, 0)
     sw_class = sw_first_ind()

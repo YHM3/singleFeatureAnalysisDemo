@@ -1,0 +1,8 @@
+streamlit
+streamlit_echarts
+pandas
+numpy
+altair
+pyecharts
+scikit-learn
+h5py

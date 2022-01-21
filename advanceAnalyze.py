@@ -44,18 +44,23 @@ ind_dict = dict(zip(np.arange(6101,
                      '非银金融')))
 
 
-@st.cache
-def sw_first_ind():
-    return pd.DataFrame(analye_base_pack["sw_ind"][:],
+sw_class = pd.DataFrame(analye_base_pack["sw_ind"][:],
                         index=pd.to_datetime(analye_base_pack["sw_ind"].attrs['row'].astype(str)),
                         columns=np.char.decode(analye_base_pack["sw_ind"].attrs['col']))
+
+boards = pd.DataFrame(np.char.decode(analye_base_pack['board'][:]),
+                          columns=np.char.decode(analye_base_pack['board'].attrs['col'])).set_index('S_INFO_WINDCODE')
+
+index_returns = pd.DataFrame(analye_base_pack["benchmarks"][:, 2:],
+                                 index=pd.to_datetime(analye_base_pack["benchmarks"].attrs['row'].astype(str)),
+                                 columns=np.char.decode(analye_base_pack["benchmarks"].attrs['col'][2:]))
+
+analye_base_pack.close()
 
 @st.cache
 def board_distribution(signal_df):
     stocks = signal_df.columns
     stocks.str.slice(0, 3)
-    boards = pd.DataFrame(np.char.decode(analye_base_pack['board'][:]),
-                          columns=np.char.decode(analye_base_pack['board'].attrs['col'])).set_index('S_INFO_WINDCODE')
     boards_map = signal_df.T.copy()
     boards_map.index = boards.loc[stocks].values.reshape(-1)
     boards_map = boards_map.groupby(
@@ -75,9 +80,6 @@ def mv_style_analysis(return_series):
     else:
         first_d = dates[0]
         last_d = dates[-1]
-    index_returns = pd.DataFrame(analye_base_pack["benchmarks"][:, 2:],
-                                 index=pd.to_datetime(analye_base_pack["benchmarks"].attrs['row'].astype(str)),
-                                 columns=np.char.decode(analye_base_pack["benchmarks"].attrs['col'][2:]))
     index_returns = index_returns.rename(
         columns={
             'CN2372.CNI': '大盘成长',
@@ -94,7 +96,6 @@ def mv_style_analysis(return_series):
 @st.cache
 def ind_distribution(weights_map):
     sigs_map = np.heaviside(weights_map, 0)
-    sw_class = sw_first_ind()
     sw_class = pd.DataFrame(sw_class.loc[:, sigs_map.columns.intersection(sw_class.columns)],
                             index=sw_class.index.union(sigs_map.index)).sort_index().fillna(method='ffill')
     sw_class = sw_class * sigs_map

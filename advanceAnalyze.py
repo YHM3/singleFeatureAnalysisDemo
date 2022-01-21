@@ -54,6 +54,13 @@ boards = pd.DataFrame(np.char.decode(analye_base_pack['board'][:]),
 index_returns = pd.DataFrame(analye_base_pack["benchmarks"][:, 2:],
                                  index=pd.to_datetime(analye_base_pack["benchmarks"].attrs['row'].astype(str)),
                                  columns=np.char.decode(analye_base_pack["benchmarks"].attrs['col'][2:]))
+index_returns = index_returns.rename(
+        columns={
+            'CN2372.CNI': '大盘成长',
+            'CN2373.CNI': '大盘价值',
+            'CN2376.CNI': '小盘成长',
+            'CN2377.CNI': '小盘价值'})
+index_returns.index = pd.to_datetime(index_returns.index.astype(str))
 
 analye_base_pack.close()
 
@@ -80,13 +87,6 @@ def mv_style_analysis(return_series):
     else:
         first_d = dates[0]
         last_d = dates[-1]
-    index_returns = index_returns.rename(
-        columns={
-            'CN2372.CNI': '大盘成长',
-            'CN2373.CNI': '大盘价值',
-            'CN2376.CNI': '小盘成长',
-            'CN2377.CNI': '小盘价值'})
-    index_returns.index = pd.to_datetime(index_returns.index.astype(str))
     style_percent = pd.concat([index_returns, return_series], axis=1).dropna().resample('Q').apply(
         lambda d: ols_param(d, return_series.name)).resample("Q").sum().apply(lambda sr: sr / (sr.sum() + 1e-16),
                                                                               axis=1)
